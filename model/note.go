@@ -6,6 +6,7 @@ import (
 
 type Note struct {
 	ID          uint `gorm:"primaryKey;autoIncrement"`
+	Uuid        string
 	UserId      uint
 	User        User
 	Title       string
@@ -15,6 +16,8 @@ type Note struct {
 	Content     string
 	VersionKey  string
 	VersionCode uint64
+	Encrypted   string
+	Deleted     bool
 	CreatedTime time.Time
 	UpdateTime  time.Time `gorm:"autoUpdateTime"`
 }

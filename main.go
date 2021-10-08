@@ -2,15 +2,14 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	db2 "notebook/db"
+	"notebook/resources"
 )
 
 func main() {
-
+	db := db2.Database
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	user := resources.UserResource{Db: db}
+	r.GET("/login", user.Login)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
