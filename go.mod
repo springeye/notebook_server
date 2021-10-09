@@ -4,11 +4,13 @@ go 1.17
 
 require (
 	github.com/gin-gonic/gin v1.7.2
+	github.com/pquerna/otp v1.3.0
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.21.12
 )
 
 require (
+	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect

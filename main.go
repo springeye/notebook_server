@@ -10,6 +10,6 @@ func main() {
 	db := db2.Database
 	r := gin.Default()
 	user := resources.UserResource{Db: db}
-	r.GET("/login", user.Login)
+	r.GET("/user/login", user.Login)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

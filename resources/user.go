@@ -1,9 +1,10 @@
 package resources
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 type UserInput struct {
@@ -21,5 +22,13 @@ func (r UserResource) Login(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		context.Abort()
+	} else {
+		context.JSON(200, gin.H{
+
+			"you_request": gin.H{
+				"username": user.Username,
+				"password": user.Password,
+			},
+		})
 	}
 }
