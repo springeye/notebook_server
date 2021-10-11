@@ -24,4 +24,4 @@ jobs:
           go-version: '1.17.2'
       - run: go test
         env:
-          notebook_redis: redis
+          notebook_redis: localhost
