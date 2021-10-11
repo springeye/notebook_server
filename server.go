@@ -1,15 +1,20 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
+	"io/fs"
 	"net/http"
-	db2 "notebook/db"
+	"notebook/database"
 	"notebook/resources"
 	"os"
 )
+
+//go:embed static
+var static embed.FS
 
 func init() {
 	// Log as JSON instead of the default ASCII formatter.
@@ -31,19 +36,32 @@ func main() {
 	setupServer().Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 func setupServer() *gin.Engine {
-	_, err := db2.Redis.Ping(db2.RedisContext).Result()
+	_, err := database.Redis.Ping(database.RedisContext).Result()
 	if err != nil {
 		panic(err)
 	}
 	gin.ForceConsoleColor()
-	db := db2.Database
+	db := database.Database
 	r := gin.New()
+	r.NoRoute(func(context *gin.Context) {
+		context.JSON(200, gin.H{
+			"code": 404,
+			"msg":  "not found api route",
+		})
+	})
 	r.Use(gin.Logger(), gin.Recovery())
-	r.Static("/admin", "./static/admin")
-
+	//register static web
+	adminDir, _ := fs.Sub(static, "static/admin")
+	r.StaticFS("/admin", http.FS(adminDir))
+	webDir, _ := fs.Sub(static, "static/web")
+	r.StaticFS("/web", http.FS(webDir))
+	r.GET("/", func(context *gin.Context) {
+		context.Redirect(301, "/web")
+	})
+	//register api route
 	api := r.Group("/api")
 	{
-		user := resources.UserResource{Db: db, Redis: db2.Redis}
+		user := resources.UserResource{Db: db, Redis: database.Redis}
 		api.POST("/user/login", user.Login)
 	}
 	notebook := api.Group("/notebook")
@@ -71,7 +89,7 @@ func AuthRequired() gin.HandlerFunc {
 			context.Abort()
 		}
 		contextLogger.Debug("request header token: ", token)
-		val, err := db2.Redis.Get(db2.RedisContext, fmt.Sprintf("token:%s", token)).Bytes()
+		val, err := database.Redis.Get(database.RedisContext, fmt.Sprintf("token:%s", token)).Bytes()
 		if err == redis.Nil {
 			context.Status(http.StatusUnauthorized)
 			context.Abort()

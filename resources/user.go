@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 	"io"
 	"net/http"
-	"notebook/db"
+	"notebook/database"
 	"notebook/model"
 	"strings"
 )
@@ -60,7 +60,7 @@ func (r UserResource) Login(context *gin.Context) {
 		}
 		token := uuid.NewString()
 		j, _ := json.Marshal(result)
-		r.Redis.SAdd(db.RedisContext, fmt.Sprintf("token:%s", token), string(j))
+		r.Redis.SAdd(database.RedisContext, fmt.Sprintf("token:%s", token), string(j))
 		context.JSON(200, gin.H{
 			"code": 0,
 			"msg":  "",
