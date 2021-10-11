@@ -21,7 +21,7 @@ func init() {
 	}
 
 	Redis = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:s", host, port),
+		Addr:     fmt.Sprintf("%s:%s", host, port),
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
