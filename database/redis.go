@@ -4,24 +4,17 @@ import (
 	"context"
 	"fmt"
 	redis "github.com/go-redis/redis/v8"
-	"os"
+	config2 "notebook/config"
 )
 
 var RedisContext = context.Background()
 var Redis *redis.Client
 
 func init() {
-	host := "localhost"
-	port := "6379"
-	if os.Getenv("REDIS_HOST") != "" {
-		host = os.Getenv("REDIS_HOST")
-	}
-	if os.Getenv("REDIS_PORT") != "" {
-		port = "6379"
-	}
+	cfg := config2.Config
 
 	Redis = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", host, port),
+		Addr:     fmt.Sprintf("%s:%d", cfg.Redis.Host, cfg.Redis.Port),
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})

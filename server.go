@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io/fs"
 	"net/http"
+	config2 "notebook/config"
 	"notebook/database"
 	"notebook/resources"
 	"os"
@@ -33,8 +34,9 @@ func init() {
 
 func main() {
 
-	setupServer().Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	setupServer().Run(fmt.Sprintf("0.0.0.0:%d", config2.Config.Server.Port)) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
+
 func setupServer() *gin.Engine {
 	_, err := database.Redis.Ping(database.RedisContext).Result()
 	if err != nil {
