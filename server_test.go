@@ -32,7 +32,7 @@ func TestLoginRoute(t *testing.T) {
 	defer ts.Close()
 	params := resources.UserInput{
 		Username: "henjue",
-		Password: "alalalalalalalalsjsjdhfgwiwiwiwi",
+		Password: "E10ADC3949BA59ABBE56E057F20F883E",
 	}
 	paramsByte, _ := json.Marshal(params)
 	resp, err := http.Post(fmt.Sprintf("%s/api/user/login", ts.URL), "application/json", bytes.NewBuffer(paramsByte))
@@ -51,7 +51,7 @@ func TestNoteBookListRoute(t *testing.T) {
 	}
 	req.Header = http.Header{
 		"Content-Type":  []string{"application/json"},
-		"Authorization": []string{"jajdklfajlkdfjalksdfjlk"},
+		"Authorization": []string{"84c767e5-e819-42cb-acc0-a3e695056c04"},
 	}
 	resp, err := client.Do(req)
 	if err != nil {
