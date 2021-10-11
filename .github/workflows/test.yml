@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17.2'
-      - run: go test
+      - run: go test -v -race ./...
         env:
           GIN_MODE: test
           REDIS_HOST: localhost
