@@ -12,11 +12,16 @@ var Redis *redis.Client
 
 func init() {
 	host := "localhost"
-	if os.Getenv("notebook_redis") != "" {
-		host = os.Getenv("notebook_redis")
+	port := "6379"
+	if os.Getenv("REDIS_HOST") != "" {
+		host = os.Getenv("REDIS_HOST")
 	}
+	if os.Getenv("REDIS_PORT") != "" {
+		port = "6379"
+	}
+
 	Redis = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:6379", host),
+		Addr:     fmt.Sprintf("%s:s", host, port),
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})

@@ -24,4 +24,6 @@ jobs:
           go-version: '1.17.2'
       - run: go test
         env:
-          notebook_redis: localhost
+          GIN_MODE: test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
