@@ -5,9 +5,8 @@ on:
       - master
   pull_request:
 jobs:
-  container-job:
+  go-test:
     runs-on: ubuntu-latest
-    container: ubuntu-latest
     services:
       redis:
         image: redis
@@ -16,8 +15,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-  test:
-    runs-on: ubuntu-latest
+      ports:
+        - 6379:6379
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-go@v2
