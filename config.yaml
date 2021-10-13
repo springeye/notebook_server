@@ -5,5 +5,5 @@ redis:
   port: 6379
 cache:
   # 缓存类型：memory,redis
-  type: memory
+  type: redis
   expiration: 5s

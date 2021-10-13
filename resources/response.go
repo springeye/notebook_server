@@ -10,6 +10,10 @@ type ErrCode int64
 const (
 	ERROR_FIELD             = 10001
 	ERROR_WRONG_USER_OR_PWD = 10002
+	ERROR_USER_NOT_FOUND    = 10003
+	ERROR_LOGIN_ERROR       = 10004
+	ERROR_REG_ERROR         = 10005
+	ERROR_ALREADY_EXIST     = 10006
 )
 
 type Response struct {

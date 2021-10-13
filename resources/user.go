@@ -76,12 +76,12 @@ func (r UserResource) Register(context *gin.Context) {
 					"token": token,
 				})
 			} else {
-				sendError(context, 10004, "register failed")
+				sendError(context, ERROR_REG_ERROR, "register failed")
 				return
 			}
 
 		} else {
-			sendError(context, 10003, "username already exists")
+			sendError(context, ERROR_ALREADY_EXIST, "username already exists")
 			return
 		}
 	}
@@ -98,11 +98,11 @@ func (r UserResource) Login(context *gin.Context) {
 		var result model.User
 		err = r.Db.Where("username = ?", []string{input.Username}).First(&result).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			context.AbortWithStatus(http.StatusNotFound)
+			sendError(context, ERROR_USER_NOT_FOUND, "user not found")
 			return
 		} else if err != nil {
 			logger.Panic(err)
-			context.AbortWithStatus(http.StatusInternalServerError)
+			sendError(context, ERROR_LOGIN_ERROR, err.Error())
 			return
 		}
 		//1.input password is encrypted through MD5
