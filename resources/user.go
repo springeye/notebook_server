@@ -2,6 +2,7 @@ package resources
 
 import (
 	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,38 +17,93 @@ import (
 	. "notebook/cache"
 	"notebook/database"
 	"notebook/model"
-	"strings"
 	"time"
 )
 
-type UserInput struct {
+type UserLoginInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"len=32"`
 	Opt      string `json:"opt,omitempty"`
+}
+type UserRegisterInput struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"len=32"`
 }
 type UserResource struct {
 	Db    *gorm.DB
 	Redis *redis.Client
 }
 
-func (r UserResource) Login(context *gin.Context) {
+func (r UserResource) Register(context *gin.Context) {
 	logger := log.WithFields(log.Fields{})
-	var input UserInput
+	var input UserRegisterInput
 	err := context.ShouldBindJSON(&input)
 	if err != nil {
 		logger.Debug(err)
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		context.Abort()
+		sendFieldError(context, err.Error())
+		return
+	} else {
+		var user model.User
+		err = r.Db.Where("username = ?", []string{input.Username}).First(&user).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			//1.input password is encrypted through MD5
+			//2.Encrypt "password+salt" via m5d
+			//3.Compare passwords stored in the database
+			salt := uuid.NewString()
+			text := fmt.Sprintf("%s%s", input.Password, salt)
+			h := md5.New()
+			io.WriteString(h, text)
+			md5Pwd := hex.EncodeToString(h.Sum(nil))
+			user = model.User{
+				Username: input.Username,
+				Password: md5Pwd,
+				Salt:     salt,
+			}
+			result := r.Db.Create(&user)
+			if result.Error != nil {
+				context.AbortWithError(http.StatusInternalServerError, result.Error)
+			} else if result.RowsAffected > 0 && user.ID > 0 {
+				token := uuid.NewString()
+				j, _ := json.Marshal(&user)
+
+				err := Cache.Set(database.RedisContext, fmt.Sprintf("token:%s", token), j, &store.Options{Expiration: time.Duration(-1)})
+				if err != nil {
+					logger.Panic(err)
+					context.AbortWithStatus(http.StatusInternalServerError)
+					return
+				}
+				sendOk(context, gin.H{
+					"token": token,
+				})
+			} else {
+				sendError(context, 10004, "register failed")
+				return
+			}
+
+		} else {
+			sendError(context, 10003, "username already exists")
+			return
+		}
+	}
+}
+func (r UserResource) Login(context *gin.Context) {
+	logger := log.WithFields(log.Fields{})
+	var input UserLoginInput
+	err := context.ShouldBindJSON(&input)
+	if err != nil {
+		logger.Debug(err)
+		sendFieldError(context, err.Error())
+		return
 	} else {
 		var result model.User
 		err = r.Db.Where("username = ?", []string{input.Username}).First(&result).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			context.Status(http.StatusNotFound)
-			context.Abort()
+			context.AbortWithStatus(http.StatusNotFound)
+			return
 		} else if err != nil {
 			logger.Panic(err)
-			context.Status(http.StatusInternalServerError)
-			context.Abort()
+			context.AbortWithStatus(http.StatusInternalServerError)
+			return
 		}
 		//1.input password is encrypted through MD5
 		//2.Encrypt "password+salt" via m5d
@@ -55,27 +111,23 @@ func (r UserResource) Login(context *gin.Context) {
 		text := fmt.Sprintf("%s%s", input.Password, result.Salt)
 		h := md5.New()
 		io.WriteString(h, text)
-		md5Pwd := string(h.Sum(nil))
-		if !strings.EqualFold(md5Pwd, result.Password) {
+		md5Pwd := hex.EncodeToString(h.Sum(nil))
+		if md5Pwd != result.Password {
 			logger.Debug("username or password is error")
-			context.Status(http.StatusUnauthorized)
-			context.Abort()
+			sendError(context, ERROR_WRONG_USER_OR_PWD, "username or password is error")
+			return
 		}
 		token := uuid.NewString()
-		j, _ := json.Marshal(result)
+		j, _ := json.Marshal(&result)
 
 		err := Cache.Set(database.RedisContext, fmt.Sprintf("token:%s", token), j, &store.Options{Expiration: time.Duration(-1)})
 		if err != nil {
 			logger.Panic(err)
-			context.Status(http.StatusInternalServerError)
-			context.Abort()
+			context.AbortWithStatus(http.StatusInternalServerError)
+			return
 		}
-		context.JSON(200, gin.H{
-			"code": 0,
-			"msg":  "",
-			"data": gin.H{
-				"token": token,
-			},
+		sendOk(context, gin.H{
+			"token": token,
 		})
 	}
 }

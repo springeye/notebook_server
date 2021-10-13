@@ -27,7 +27,7 @@ func TestRoute(t *testing.T) {
 	ts := httptest.NewServer(setupServer())
 	defer ts.Close()
 	t.Run("Login", func(t *testing.T) {
-		params := resources.UserInput{
+		params := resources.UserLoginInput{
 			Username: "henjue",
 			Password: "E10ADC3949BA59ABBE56E057F20F883E",
 		}

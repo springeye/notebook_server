@@ -48,6 +48,7 @@ func setupServer() *gin.Engine {
 	gin.ForceConsoleColor()
 	db := database.Database
 	r := gin.New()
+	r.HandleMethodNotAllowed = true
 	r.NoRoute(func(context *gin.Context) {
 		context.JSON(200, gin.H{
 			"code": 404,
@@ -67,7 +68,9 @@ func setupServer() *gin.Engine {
 	api := r.Group("/api")
 	{
 		user := resources.UserResource{Db: db, Redis: database.Redis}
+
 		api.POST("/user/login", user.Login)
+		api.POST("/user/register", user.Register)
 	}
 	notebook := api.Group("/notebook")
 	note := api.Group("/note")
