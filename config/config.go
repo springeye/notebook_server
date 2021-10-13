@@ -1,6 +1,16 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+	"time"
+)
+
+type CacheType string
+
+const (
+	Memory CacheType = "memory"
+	Redis            = "redis"
+)
 
 type AppConfig struct {
 	Server *struct {
@@ -9,6 +19,10 @@ type AppConfig struct {
 	Redis *struct {
 		Host string
 		Port int
+	}
+	Cache *struct {
+		Type       CacheType
+		Expiration time.Duration
 	}
 }
 

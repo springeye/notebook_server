@@ -3,3 +3,7 @@ server:
 redis:
   host: localhost
   port: 6379
+cache:
+  # 缓存类型：memory,redis
+  type: memory
+  expiration: 5s

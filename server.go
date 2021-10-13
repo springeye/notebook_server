@@ -1,14 +1,17 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"fmt"
+	"github.com/allegro/bigcache/v3"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 	"io/fs"
 	"net/http"
-	config2 "notebook/config"
+	. "notebook/cache"
+	conf "notebook/config"
 	"notebook/database"
 	"notebook/resources"
 	"os"
@@ -34,7 +37,7 @@ func init() {
 
 func main() {
 
-	setupServer().Run(fmt.Sprintf("0.0.0.0:%d", config2.Config.Server.Port)) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	setupServer().Run(fmt.Sprintf("0.0.0.0:%d", conf.Config.Server.Port)) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
 func setupServer() *gin.Engine {
@@ -83,6 +86,7 @@ func setupServer() *gin.Engine {
 	return r
 }
 func AuthRequired() gin.HandlerFunc {
+	ctx := context.Background()
 	contextLogger := log.WithFields(log.Fields{})
 	return func(context *gin.Context) {
 		token := context.GetHeader("Authorization")
@@ -90,16 +94,17 @@ func AuthRequired() gin.HandlerFunc {
 			context.Status(http.StatusUnauthorized)
 			context.Abort()
 		}
-		contextLogger.Debug("request header token: ", token)
-		val, err := database.Redis.Get(database.RedisContext, fmt.Sprintf("token:%s", token)).Bytes()
-		if err == redis.Nil {
+
+		val, err := Cache.Get(ctx, fmt.Sprintf("token:%s", token))
+
+		if err == redis.Nil || err == bigcache.ErrEntryNotFound {
 			context.Status(http.StatusUnauthorized)
 			context.Abort()
 		} else if err != nil {
 			contextLogger.Panic(err)
 			context.Status(http.StatusInternalServerError)
 			context.Abort()
-		} else if len(val) <= 0 {
+		} else if val == nil {
 			context.Status(http.StatusUnauthorized)
 			context.Abort()
 		} else {

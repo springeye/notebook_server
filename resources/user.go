@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/eko/gocache/v2/store"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
@@ -12,9 +13,11 @@ import (
 	"gorm.io/gorm"
 	"io"
 	"net/http"
+	. "notebook/cache"
 	"notebook/database"
 	"notebook/model"
 	"strings"
+	"time"
 )
 
 type UserInput struct {
@@ -60,7 +63,13 @@ func (r UserResource) Login(context *gin.Context) {
 		}
 		token := uuid.NewString()
 		j, _ := json.Marshal(result)
-		r.Redis.SAdd(database.RedisContext, fmt.Sprintf("token:%s", token), string(j))
+
+		err := Cache.Set(database.RedisContext, fmt.Sprintf("token:%s", token), j, &store.Options{Expiration: time.Duration(-1)})
+		if err != nil {
+			logger.Panic(err)
+			context.Status(http.StatusInternalServerError)
+			context.Abort()
+		}
 		context.JSON(200, gin.H{
 			"code": 0,
 			"msg":  "",
