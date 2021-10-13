@@ -9,27 +9,39 @@ import (
 	"notebook/database"
 )
 
-var Cache *cache.Cache
+var Cache ICache
+
+type ICache interface {
+	Get(ctx context.Context, key string) (interface{}, error)
+	Set(ctx context.Context, key string, object interface{}, options *store.Options) error
+	Delete(ctx context.Context, key interface{}) error
+	Invalidate(ctx context.Context, options store.InvalidateOptions) error
+	Clear(ctx context.Context) error
+	GetType() string
+}
 
 func init() {
+	var c *cache.Cache
 	ctx := context.Background()
 	cacheConf := conf.Config.Cache
 	if cacheConf.Type == conf.Memory {
 		bigcacheClient, _ := bigcache.NewBigCache(bigcache.DefaultConfig(cacheConf.Expiration))
 		cacheStore := store.NewBigcache(bigcacheClient, nil) // No options provided (as second argument)
-		Cache = cache.New(cacheStore)
+		c = cache.New(cacheStore)
 
 	} else if cacheConf.Type == conf.Redis {
 		cacheStore := store.NewRedis(database.Redis, &store.Options{
 			Expiration: cacheConf.Expiration,
 		})
-		Cache = cache.New(cacheStore)
+		c = cache.New(cacheStore)
 	} else {
 		panic("config cache.type must \"memory\" or \"redis\"")
 	}
-	err := Cache.Set(ctx, "test-key", []byte("test"), nil)
+	err := c.Set(ctx, "test-key", []byte("test"), nil)
 	if err != nil {
 		panic(err)
 	}
-	Cache.Delete(ctx, "test-key")
+	c.Delete(ctx, "test-key")
+	Cache = appCache{Cache: c}
+
 }
