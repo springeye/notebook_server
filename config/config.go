@@ -7,14 +7,33 @@ import (
 
 type CacheType string
 
+type DataBaseType string
+
 const (
 	Memory CacheType = "memory"
 	Redis            = "redis"
+)
+const (
+	SQLITE DataBaseType = "sqlite"
+	MYSQL               = "mysql"
 )
 
 type AppConfig struct {
 	Server *struct {
 		Port int
+	}
+	Database *struct {
+		Type   DataBaseType
+		Sqlite *struct {
+			File string
+		}
+		MySQL *struct {
+			Host     string
+			Port     int
+			Name     string
+			Username string
+			Password string
+		}
 	}
 	Redis *struct {
 		Host string
@@ -26,7 +45,7 @@ type AppConfig struct {
 	}
 }
 
-var Config *AppConfig
+var Conf *AppConfig
 
 func init() {
 	v := viper.New()
@@ -37,7 +56,7 @@ func init() {
 	if err := v.ReadInConfig(); err != nil {
 		panic(err)
 	}
-	err := v.Unmarshal(&Config)
+	err := v.Unmarshal(&Conf)
 	if err != nil {
 		panic(err)
 	}

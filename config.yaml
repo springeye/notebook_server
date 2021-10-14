@@ -3,7 +3,19 @@ server:
 redis:
   host: localhost
   port: 6379
+database:
+  # 缓存类型：sqlite,mysql
+  type: sqlite
+  sqlite:
+    file: /app.db
+#  mysql:
+#    host: localhost
+#    port: 3306
+#    name: notebook
+#    username: root
+#    password: 123456
+
 cache:
   # 缓存类型：memory,redis
-  type: redis
+  type: memory
   expiration: 5s

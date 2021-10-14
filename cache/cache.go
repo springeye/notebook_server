@@ -23,7 +23,7 @@ type ICache interface {
 func init() {
 	var c *cache.Cache
 	ctx := context.Background()
-	cacheConf := conf.Config.Cache
+	cacheConf := conf.Conf.Cache
 	if cacheConf.Type == conf.Memory {
 		bigcacheClient, _ := bigcache.NewBigCache(bigcache.DefaultConfig(cacheConf.Expiration))
 		cacheStore := store.NewBigcache(bigcacheClient, nil) // No options provided (as second argument)

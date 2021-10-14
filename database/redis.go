@@ -11,7 +11,7 @@ var RedisContext = context.Background()
 var Redis *redis.Client
 
 func init() {
-	cfg := config2.Config
+	cfg := config2.Conf
 
 	Redis = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Redis.Host, cfg.Redis.Port),

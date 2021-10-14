@@ -37,7 +37,7 @@ func init() {
 
 func main() {
 
-	setupServer().Run(fmt.Sprintf("0.0.0.0:%d", conf.Config.Server.Port)) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	setupServer().Run(fmt.Sprintf("0.0.0.0:%d", conf.Conf.Server.Port)) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
 func setupServer() *gin.Engine {
