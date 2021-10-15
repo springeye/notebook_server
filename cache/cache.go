@@ -30,6 +30,7 @@ func init() {
 		c = cache.New(cacheStore)
 
 	} else if cacheConf.Type == conf.Redis {
+
 		cacheStore := store.NewRedis(database.Redis, &store.Options{
 			Expiration: cacheConf.Expiration,
 		})

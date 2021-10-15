@@ -24,6 +24,9 @@ type AppConfig struct {
 	}
 	Database *struct {
 		Type   DataBaseType
+		Logger *struct {
+			Level string
+		}
 		Sqlite *struct {
 			File string
 		}
@@ -50,7 +53,9 @@ var Conf *AppConfig
 func init() {
 	v := viper.New()
 	v.SetConfigName("config")
+	v.AddConfigPath("/app")
 	v.AddConfigPath("./")
+	v.AddConfigPath("../")
 	v.SetConfigType("yaml")
 	v.AutomaticEnv()
 	if err := v.ReadInConfig(); err != nil {

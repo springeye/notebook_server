@@ -1,4 +1,4 @@
-package resources
+package router
 
 import (
 	"crypto/md5"
