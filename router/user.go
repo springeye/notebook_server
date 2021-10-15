@@ -25,6 +25,9 @@ type UserLoginInput struct {
 	Password string `json:"password" binding:"len=32"`
 	Opt      string `json:"opt,omitempty"`
 }
+type AuthOutput struct {
+	Token string `json:"token"`
+}
 type UserRegisterInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"len=32"`
@@ -72,9 +75,7 @@ func (r UserResource) Register(context *gin.Context) {
 					context.AbortWithStatus(http.StatusInternalServerError)
 					return
 				}
-				sendOk(context, gin.H{
-					"token": token,
-				})
+				sendOk(context, &AuthOutput{token})
 			} else {
 				sendError(context, ERROR_REG_ERROR, "register failed")
 				return
@@ -126,8 +127,6 @@ func (r UserResource) Login(context *gin.Context) {
 			context.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
-		sendOk(context, gin.H{
-			"token": token,
-		})
+		sendOk(context, &AuthOutput{token})
 	}
 }

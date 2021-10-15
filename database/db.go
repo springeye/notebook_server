@@ -1,13 +1,18 @@
 package database
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	log2 "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"io"
 	"log"
 	conf "notebook/config"
 	"notebook/model"
@@ -70,4 +75,25 @@ func init() {
 		&model.Otp{},
 		&model.Notebook{},
 		&model.Note{})
+	if gin.Mode() == "test" || gin.Mode() == "debug" {
+		var count int64
+		err := Database.Model(new(model.User)).Count(&count).Error
+		if err != nil {
+			panic(err)
+		}
+		if count <= 0 {
+			salt := uuid.NewString()
+			text := fmt.Sprintf("%s%s", "E10ADC3949BA59ABBE56E057F20F883E", salt)
+			h := md5.New()
+			io.WriteString(h, text)
+			md5Pwd := hex.EncodeToString(h.Sum(nil))
+			user := model.User{
+				Username: "test",
+				Password: md5Pwd,
+				Salt:     salt,
+			}
+			Database.Create(&user)
+		}
+
+	}
 }
