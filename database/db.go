@@ -40,7 +40,7 @@ func init() {
 	}
 
 	dbconf := config2.Conf.Database
-	log.Printf("Database type: %s", dbconf.Type)
+	log.Printf("Database type: ", dbconf.Type)
 	if dbconf.Type == config2.SQLITE {
 		b, _ := json.Marshal(dbconf.Sqlite)
 		dbLogger.Info("Database conf: %s", string(b))
@@ -51,7 +51,7 @@ func init() {
 		Database, err = gorm.Open(sqlite.Open(dbpath), &config)
 	} else if dbconf.Type == config2.MYSQL {
 		b, _ := json.Marshal(dbconf.MySQL)
-		dbLogger.Printf("Database conf: %s", string(b))
+		dbLogger.Printf("Database conf: ", string(b))
 		db := dbconf.MySQL
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 			db.Username, db.Password,
