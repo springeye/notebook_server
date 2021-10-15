@@ -18,18 +18,15 @@ jobs:
         ports:
           - 6379:6379
     steps:
-      - uses: ./
-        if: ${{ env.ACT }}
       - uses: actions/checkout@master
-        if: ${{ !env.ACT }}
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17.2'
       - run: go test -v -race
         env:
           GIN_MODE: test
-          redis.host: localhost
-          redis.port: 6379
-          cache.type: memory
-          database.type: mysql
-          database.sqlite.file: test.db
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          CACHE_TYPE: memory
+          DATABASE_TYPE: sqlite
+          DATABASE_SQLITE_FILE: test.db
