@@ -30,4 +30,4 @@ jobs:
           REDIS.PORT: 6379
           CACHE.TYPE: memory
           DATABASE.TYPE: sqlite
-          DATABASE.SQLITE.FILE: test.db
+          DATABASE.SQLITE.FILE: file::memory
