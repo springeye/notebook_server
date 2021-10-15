@@ -5,4 +5,4 @@ WORKDIR /app
 RUN go mod tidy
 
 RUN go build -ldflags '-w -s' -o server
-CMD ["server"]
+CMD ["/app/server"]
