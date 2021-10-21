@@ -9,25 +9,16 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	. "notebook/cache"
+	"notebook/docs"
 	static2 "notebook/static"
 
 	"notebook/database"
-	"os"
 )
+import swaggerfiles "github.com/swaggo/files"
+import ginSwagger "github.com/swaggo/gin-swagger"
 
 func init() {
-	// Log as JSON instead of the default ASCII formatter.
-	//log.SetFormatter(&log.JSONFormatter{})
 
-	// Output to stdout instead of the default stderr
-	// Can be any io.Writer, see below for File example
-	log.SetOutput(os.Stdout)
-	log.SetFormatter(&log.TextFormatter{
-		DisableColors: false,
-		FullTimestamp: false,
-	})
-	// Only log the warning severity or above.
-	log.SetLevel(log.TraceLevel)
 }
 
 func SetupServer() *gin.Engine {
@@ -45,12 +36,15 @@ func SetupServer() *gin.Engine {
 		})
 	})
 	r.Use(gin.Logger(), gin.Recovery())
+
 	//register static web
 	r.StaticFS("/admin", http.FS(adminDir))
 	r.StaticFS("/web", http.FS(webDir))
 	r.GET("/", func(context *gin.Context) {
 		context.Redirect(301, "/web")
 	})
+	docs.SwaggerInfo.BasePath = "/api"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	//register api route
 	api := r.Group("/api")
 	{

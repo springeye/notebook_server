@@ -1,13 +1,11 @@
 package router
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	log2 "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"notebook/cache"
+	"notebook/database"
 	"notebook/model"
 )
 
@@ -16,17 +14,24 @@ type NotebookResource struct {
 	Redis *redis.Client
 }
 
+// @BasePath /api
+// @Summary get notebook list
+// @Schemes
+// @Description get notebook list
+// @Tags notebook
+// @Accept json
+// @Produce json
+// @Success 200 {array} model.Notebook
+// @Router /notebook/list [get]
+// @Security user_token
 func (r *NotebookResource) GetNotebookList(c *gin.Context) {
-	token := c.GetHeader("Authorization")
-	ctx := context.Background()
-	rr, err := cache.Cache.Get(ctx, fmt.Sprintf("token:%s", token))
+
+	var results []model.Notebook
+	err := database.Database.Find(&results).Error
 	if err != nil {
-		sendError(c, 9999, err.Error())
+		log2.Panic(err)
+	} else {
+		sendOk(c, results)
 	}
-	var result model.User
-	err = json.Unmarshal(rr.([]byte), &result)
-	if err != nil {
-		sendError(c, 9999, err.Error())
-	}
-	sendOk(c, result)
+
 }

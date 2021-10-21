@@ -1,7 +1,9 @@
 package config
 
 import (
+	log2 "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"os"
 	"time"
 )
 
@@ -22,11 +24,13 @@ type AppConfig struct {
 	Server *struct {
 		Port int
 	}
+	Logger *struct {
+		ShowSql bool `mapstructure:"show_sql"`
+		Level   string
+	}
 	Database *struct {
-		Type   DataBaseType
-		Logger *struct {
-			Level string
-		}
+		Type DataBaseType
+
 		Sqlite *struct {
 			File string
 		}
@@ -51,6 +55,7 @@ type AppConfig struct {
 var Conf *AppConfig
 
 func init() {
+	log2.SetLevel(log2.TraceLevel)
 	v := viper.New()
 	v.SetConfigName("config")
 	v.AddConfigPath("/app")
@@ -65,4 +70,18 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	if Conf.Logger.Level == "info" {
+		log2.SetLevel(log2.InfoLevel)
+	} else if Conf.Logger.Level == "warn" {
+		log2.SetLevel(log2.WarnLevel)
+	} else if Conf.Logger.Level == "error" {
+		log2.SetLevel(log2.ErrorLevel)
+	}
+	log2.SetOutput(os.Stdout)
+	log2.SetFormatter(&log2.TextFormatter{
+		DisableColors: false,
+		FullTimestamp: false,
+	})
+
 }

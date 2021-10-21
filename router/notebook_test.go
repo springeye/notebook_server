@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestGetNotebookList(t *testing.T) {
@@ -44,10 +45,11 @@ func TestGetNotebookList(t *testing.T) {
 		"Content-Type":  []string{"application/json"},
 		"Authorization": []string{token},
 	}
+	time.Sleep(time.Second * 7)
 	resp2, err := client.Do(req)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
-	assert.Equal(t, 401, resp2.StatusCode)
+	assert.Equal(t, 200, resp2.StatusCode)
 }

@@ -22,7 +22,7 @@ import (
 
 type UserLoginInput struct {
 	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"len=32"`
+	Password string `json:"password" binding:"required,len=32"`
 	Opt      string `json:"opt,omitempty"`
 }
 type AuthOutput struct {
@@ -87,6 +87,17 @@ func (r UserResource) Register(context *gin.Context) {
 		}
 	}
 }
+
+// @BasePath /api
+// @Summary login
+// @Schemes
+// @Description user login
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param account body UserLoginInput true "login user info"
+// @Success 200 {object} AuthOutput
+// @Router /user/login [post]
 func (r UserResource) Login(context *gin.Context) {
 	logger := log.WithFields(log.Fields{})
 	var input UserLoginInput
@@ -121,7 +132,7 @@ func (r UserResource) Login(context *gin.Context) {
 		token := uuid.NewString()
 		j, _ := json.Marshal(&result)
 
-		err := Cache.Set(database.RedisContext, fmt.Sprintf("token:%s", token), j, &store.Options{Expiration: time.Duration(-1)})
+		err := Cache.Set(database.RedisContext, fmt.Sprintf("token:%s", token), j, &store.Options{})
 		if err != nil {
 			logger.Panic(err)
 			context.AbortWithStatus(http.StatusInternalServerError)

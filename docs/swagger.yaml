@@ -1,0 +1,135 @@
+definitions:
+  model.Note:
+    properties:
+      content:
+        type: string
+      createdTime:
+        type: string
+      deleted:
+        type: boolean
+      encrypted:
+        type: string
+      id:
+        type: integer
+      notebook:
+        $ref: '#/definitions/model.Notebook'
+      notebookId:
+        type: integer
+      password:
+        type: string
+      title:
+        type: string
+      updateTime:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+      userId:
+        type: integer
+      uuid:
+        type: string
+      versionCode:
+        type: integer
+      versionKey:
+        type: string
+    type: object
+  model.Notebook:
+    properties:
+      id:
+        type: integer
+      notebook:
+        $ref: '#/definitions/model.Notebook'
+      notes:
+        items:
+          $ref: '#/definitions/model.Note'
+        type: array
+      password:
+        type: string
+      pid:
+        type: integer
+      title:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+      userId:
+        type: integer
+      uuid:
+        type: string
+    type: object
+  model.User:
+    properties:
+      id:
+        type: integer
+      optId:
+        type: integer
+      salt:
+        type: string
+      username:
+        type: string
+    type: object
+  router.AuthOutput:
+    properties:
+      token:
+        type: string
+    type: object
+  router.UserLoginInput:
+    properties:
+      opt:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+info:
+  contact: {}
+paths:
+  /notebook/list:
+    get:
+      consumes:
+      - application/json
+      description: get notebook list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Notebook'
+            type: array
+      security:
+      - user_token: []
+      summary: get notebook list
+      tags:
+      - notebook
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: user login
+      parameters:
+      - description: login user info
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/router.UserLoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/router.AuthOutput'
+      summary: login
+      tags:
+      - user
+securityDefinitions:
+  user_token:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

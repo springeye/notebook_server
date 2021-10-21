@@ -24,17 +24,24 @@ var Database *gorm.DB
 
 func init() {
 	dbLogger := log2.WithFields(log2.Fields{})
+
 	var err error
 	logLevel := logger.Error
-	if conf.Conf.Database.Logger.Level == "info" {
-		logLevel = logger.Info
-	} else if conf.Conf.Database.Logger.Level == "warn" {
-		logLevel = logger.Warn
-	} else if conf.Conf.Database.Logger.Level == "error" {
-		logLevel = logger.Error
-	} else if conf.Conf.Database.Logger.Level == "silent" {
-		logLevel = logger.Silent
+	if conf.Conf.Logger.ShowSql {
+		if conf.Conf.Logger.Level == "info" {
+			logLevel = logger.Info
+
+		} else if conf.Conf.Logger.Level == "warn" {
+			logLevel = logger.Warn
+
+		} else if conf.Conf.Logger.Level == "error" {
+			logLevel = logger.Error
+
+		} else if conf.Conf.Logger.Level == "silent" {
+			logLevel = logger.Silent
+		}
 	}
+
 	config := gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags),
@@ -92,7 +99,18 @@ func init() {
 				Password: md5Pwd,
 				Salt:     salt,
 			}
-			Database.Create(&user)
+			err = Database.Create(&user).Error
+			if err != nil {
+				panic(err)
+			}
+			var users []model.User
+			err = Database.Find(&users).Error
+			if err != nil {
+				panic(err)
+			}
+			for _, m := range users {
+				fmt.Printf("%v", m)
+			}
 		}
 
 	}
