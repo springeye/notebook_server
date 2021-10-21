@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io/fs"
 	"net/http"
 	conf "notebook/config"
 	"notebook/docs"
@@ -19,8 +20,9 @@ func init() {
 }
 
 func SetupServer() *gin.Engine {
-	adminDir := static2.AdminStaticDir
-	webDir := static2.WebStaticDir
+	staticDir := static2.StaticDir
+	adminDir, _ := fs.Sub(staticDir, "admin")
+	webDir, _ := fs.Sub(staticDir, "web")
 
 	gin.ForceConsoleColor()
 	db := database.Database
