@@ -1,16 +1,13 @@
 package router
 
 import (
-	"context"
 	"fmt"
-	"github.com/allegro/bigcache/v3"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
-	log "github.com/sirupsen/logrus"
 	"net/http"
-	. "notebook/cache"
+	conf "notebook/config"
 	"notebook/docs"
 	static2 "notebook/static"
+	"notebook/store"
 
 	"notebook/database"
 )
@@ -35,7 +32,7 @@ func SetupServer() *gin.Engine {
 			"msg":  "not found api route",
 		})
 	})
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(gin.Logger(), gin.Recovery(), configCache())
 
 	//register static web
 	r.StaticFS("/admin", http.FS(adminDir))
@@ -71,24 +68,32 @@ func SetupServer() *gin.Engine {
 	}
 	return r
 }
+func configCache() gin.HandlerFunc {
+	var astore store.IStore
+	cacheConf := conf.Conf.Cache
+	if cacheConf.Type == conf.Memory {
+	} else if cacheConf.Type == conf.Redis {
+		astore = &store.RedisAdapter{Client: database.Redis}
+	} else if conf.Memory == cacheConf.Type {
+		astore = &store.MemAdapter{}
+	} else {
+		panic("config store.type must \"memory\" or \"redis\"")
+	}
+	return store.NewStore(astore)
+}
 func AuthRequired() gin.HandlerFunc {
-	ctx := context.Background()
-	contextLogger := log.WithFields(log.Fields{})
+
 	return func(context *gin.Context) {
 		token := context.GetHeader("Authorization")
 		if token == "" {
 			context.Status(http.StatusUnauthorized)
 			context.Abort()
 		}
+		cache := store.Default(context)
+		val := cache.Get(fmt.Sprintf("token:%s", token))
 
-		val, err := Cache.Get(ctx, fmt.Sprintf("token:%s", token))
-
-		if err == redis.Nil || err == bigcache.ErrEntryNotFound {
+		if val == nil {
 			context.Status(http.StatusUnauthorized)
-			context.Abort()
-		} else if err != nil {
-			contextLogger.Panic(err)
-			context.Status(http.StatusInternalServerError)
 			context.Abort()
 		} else if val == nil {
 			context.Status(http.StatusUnauthorized)

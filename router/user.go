@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/eko/gocache/v2/store"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
@@ -14,10 +13,8 @@ import (
 	"gorm.io/gorm"
 	"io"
 	"net/http"
-	. "notebook/cache"
-	"notebook/database"
 	"notebook/model"
-	"time"
+	"notebook/store"
 )
 
 type UserLoginInput struct {
@@ -68,13 +65,9 @@ func (r UserResource) Register(context *gin.Context) {
 			} else if result.RowsAffected > 0 && user.ID > 0 {
 				token := uuid.NewString()
 				j, _ := json.Marshal(&user)
+				cache := store.Default(context)
+				cache.Set(fmt.Sprintf("token:%s", token), j)
 
-				err := Cache.Set(database.RedisContext, fmt.Sprintf("token:%s", token), j, &store.Options{Expiration: time.Duration(-1)})
-				if err != nil {
-					logger.Panic(err)
-					context.AbortWithStatus(http.StatusInternalServerError)
-					return
-				}
 				sendOk(context, &AuthOutput{token})
 			} else {
 				sendError(context, ERROR_REG_ERROR, "register failed")
@@ -132,12 +125,9 @@ func (r UserResource) Login(context *gin.Context) {
 		token := uuid.NewString()
 		j, _ := json.Marshal(&result)
 
-		err := Cache.Set(database.RedisContext, fmt.Sprintf("token:%s", token), j, &store.Options{})
-		if err != nil {
-			logger.Panic(err)
-			context.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
+		c := store.Default(context)
+		c.Set(fmt.Sprintf("token:%s", token), j)
+
 		sendOk(context, &AuthOutput{token})
 	}
 }

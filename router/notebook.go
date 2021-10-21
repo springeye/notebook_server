@@ -25,7 +25,6 @@ type NotebookResource struct {
 // @Router /notebook/list [get]
 // @Security user_token
 func (r *NotebookResource) GetNotebookList(c *gin.Context) {
-
 	var results []model.Notebook
 	err := database.Database.Find(&results).Error
 	if err != nil {
