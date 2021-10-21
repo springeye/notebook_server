@@ -66,7 +66,7 @@ func (r UserResource) Register(context *gin.Context) {
 				token := uuid.NewString()
 				j, _ := json.Marshal(&user)
 				cache := store.Default(context)
-				cache.Set(fmt.Sprintf("token:%s", token), j)
+				cache.Set(fmt.Sprintf("token:%s", token), string(j))
 
 				sendOk(context, &AuthOutput{token})
 			} else {
@@ -126,7 +126,7 @@ func (r UserResource) Login(context *gin.Context) {
 		j, _ := json.Marshal(&result)
 
 		c := store.Default(context)
-		c.Set(fmt.Sprintf("token:%s", token), j)
+		c.Set(fmt.Sprintf("token:%s", token), string(j))
 
 		sendOk(context, &AuthOutput{token})
 	}

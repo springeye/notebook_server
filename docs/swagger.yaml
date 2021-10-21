@@ -71,6 +71,15 @@ definitions:
       token:
         type: string
     type: object
+  router.NotebookCreateInput:
+    properties:
+      password:
+        type: string
+      pid:
+        type: integer
+      title:
+        type: string
+    type: object
   router.UserLoginInput:
     properties:
       opt:
@@ -86,6 +95,25 @@ definitions:
 info:
   contact: {}
 paths:
+  /notebook:
+    post:
+      consumes:
+      - application/json
+      description: create a notebook
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/router.NotebookCreateInput'
+            type: array
+      security:
+      - user_token: []
+      summary: create a notebook
+      tags:
+      - notebook
   /notebook/list:
     get:
       consumes:

@@ -3,19 +3,19 @@ package store
 import "github.com/gin-gonic/gin"
 
 type IStore interface {
-	Get(key string) interface{}
-	Set(key string, object interface{})
+	Get(key string) string
+	Set(key string, object string)
 	Remove(key string)
 }
 type appStore struct {
 	store Adapter
 }
 
-func (a appStore) Get(key string) interface{} {
+func (a appStore) Get(key string) string {
 	return a.store.Get(key)
 }
 
-func (a appStore) Set(key string, object interface{}) {
+func (a appStore) Set(key string, object string) {
 	a.store.Set(key, object)
 }
 

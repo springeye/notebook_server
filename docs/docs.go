@@ -23,6 +23,37 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/notebook": {
+            "post": {
+                "security": [
+                    {
+                        "user_token": []
+                    }
+                ],
+                "description": "create a notebook",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notebook"
+                ],
+                "summary": "create a notebook",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/router.NotebookCreateInput"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/notebook/list": {
             "get": {
                 "security": [
@@ -196,6 +227,20 @@ var doc = `{
             "type": "object",
             "properties": {
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "router.NotebookCreateInput": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "title": {
                     "type": "string"
                 }
             }

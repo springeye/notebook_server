@@ -58,6 +58,7 @@ func SetupServer() *gin.Engine {
 			Db: db, Redis: database.Redis,
 		}
 		notebook.GET("/list", bookControl.GetNotebookList)
+		notebook.POST("", bookControl.Create)
 	}
 	note.Use(AuthRequired())
 	{
@@ -92,10 +93,7 @@ func AuthRequired() gin.HandlerFunc {
 		cache := store.Default(context)
 		val := cache.Get(fmt.Sprintf("token:%s", token))
 
-		if val == nil {
-			context.Status(http.StatusUnauthorized)
-			context.Abort()
-		} else if val == nil {
+		if val == "" {
 			context.Status(http.StatusUnauthorized)
 			context.Abort()
 		} else {

@@ -1,13 +1,13 @@
 package store
 
 type MemAdapter struct {
-	maps map[string]interface{}
+	maps map[string]string
 }
 
-func (g MemAdapter) Get(key string) interface{} {
+func (g MemAdapter) Get(key string) string {
 	return g.maps[key]
 }
-func (g MemAdapter) Set(key string, object interface{}) {
+func (g MemAdapter) Set(key string, object string) {
 	g.maps[key] = object
 }
 
