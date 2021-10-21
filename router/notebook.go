@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/google/uuid"
 	log2 "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"notebook/database"
@@ -58,11 +59,33 @@ func (r *NotebookResource) GetNotebookList(c *gin.Context) {
 // @Security user_token
 func (r *NotebookResource) Create(c *gin.Context) {
 	var input NotebookCreateInput
+	c.ShouldBindJSON(&input)
+	user := getUser(c)
+	notebook := model.Notebook{
+		Uuid:     uuid.New().String(),
+		UserId:   user.ID,
+		Title:    input.Title,
+		Pid:      &input.Pid,
+		Password: input.Password,
+	}
+	err := r.Db.Create(&notebook).Error
+	if err != nil {
+		sendError(c, 500, err.Error())
+	} else {
+		sendOk(c, nil)
+	}
+
+}
+func getUser(c *gin.Context) *model.User {
 	s := store.Default(c)
 	token := c.GetHeader("Authorization")
 	val := s.Get(fmt.Sprintf("token:%s", token))
 	var user model.User
-	json.Unmarshal([]byte(val), &user)
-	c.ShouldBindJSON(&input)
+	err := json.Unmarshal([]byte(val), &user)
+	if err == nil {
+		return &user
+	} else {
+		return nil
+	}
 
 }
