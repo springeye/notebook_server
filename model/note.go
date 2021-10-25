@@ -3,16 +3,15 @@ package model
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"strings"
 	"time"
 )
 
 type Note struct {
 	ID          string `gorm:"primaryKey"`
 	UserId      string
-	User        User
 	Title       string
-	NotebookId  string
-	Notebook    *Notebook
+	NotebookID  string
 	Password    string
 	Content     string
 	VersionKey  string
@@ -24,7 +23,6 @@ type Note struct {
 }
 
 func (nb *Note) BeforeCreate(tx *gorm.DB) (err error) {
-	// UUID version 4
-	nb.ID = uuid.NewString()
+	nb.ID = strings.ReplaceAll(uuid.NewString(), "-", "")
 	return
 }
