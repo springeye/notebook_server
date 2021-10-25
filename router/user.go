@@ -62,7 +62,7 @@ func (r UserResource) Register(context *gin.Context) {
 			result := r.Db.Create(&user)
 			if result.Error != nil {
 				context.AbortWithError(http.StatusInternalServerError, result.Error)
-			} else if result.RowsAffected > 0 && user.ID > 0 {
+			} else if result.RowsAffected > 0 && user.ID != "" {
 				token := uuid.NewString()
 				j, _ := json.Marshal(&user)
 				cache := store.Default(context)

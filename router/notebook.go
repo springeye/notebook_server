@@ -18,9 +18,9 @@ type NotebookUpdateInput struct {
 	Uuid string `json:"uuid,omitempty"`
 }
 type NotebookCreateInput struct {
-	Title    string `json:"title"`
-	Pid      uint   `json:"pid,omitempty"`
-	Password string `json:"password,omitempty"`
+	Title    string  `json:"title"`
+	Pid      *string `json:"pid,omitempty"`
+	Password string  `json:"password,omitempty"`
 }
 type NotebookResource struct {
 	Db    *gorm.DB
@@ -48,6 +48,26 @@ func (r *NotebookResource) GetNotebookList(c *gin.Context) {
 }
 
 // @BasePath /api
+// @Summary delete a notebook
+// @Schemes
+// @Description delete a notebook
+// @Tags notebook
+// @Accept json
+// @Produce json
+// @Success 200
+// @Param id string true "notebook id"
+// @Router /notebook [delete]
+// @Security user_token
+func (r *NotebookResource) Delete(c *gin.Context) {
+	id := c.Param("id")
+	r.Db.Transaction(func(tx *gorm.DB) error {
+		tx.Model(&model.Note{}).Where("NotebookId = ?").Update("NotebookId", nil)
+		tx.Model(&model.Notebook{}).Where("id = ?", id)
+		return nil
+	})
+}
+
+// @BasePath /api
 // @Summary create a notebook
 // @Schemes
 // @Description create a notebook
@@ -62,10 +82,10 @@ func (r *NotebookResource) Create(c *gin.Context) {
 	c.ShouldBindJSON(&input)
 	user := getUser(c)
 	notebook := model.Notebook{
-		Uuid:     uuid.New().String(),
-		UserId:   user.ID,
+		ID:       uuid.New().String(),
+		UserID:   user.ID,
 		Title:    input.Title,
-		Pid:      &input.Pid,
+		PID:      input.Pid,
 		Password: input.Password,
 	}
 	err := r.Db.Create(&notebook).Error

@@ -1,13 +1,23 @@
 package model
 
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
 type Notebook struct {
-	ID       uint `gorm:"primaryKey;autoIncrement"`
-	Uuid     string
-	UserId   uint
+	ID       string `gorm:"primaryKey"`
+	UserID   string
 	User     User
 	Title    string
-	Pid      *uint
+	PID      *string
 	Notebook *Notebook `gorm:"foreignKey:pid"`
 	Notes    []Note
 	Password string
+}
+
+func (nb *Notebook) BeforeCreate(tx *gorm.DB) (err error) {
+	// UUID version 4
+	nb.ID = uuid.NewString()
+	return
 }
