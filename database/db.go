@@ -79,7 +79,6 @@ func init() {
 	}
 	Database.AutoMigrate(
 		&model.User{},
-		&model.Otp{},
 		&model.Notebook{},
 		&model.Note{})
 	if gin.Mode() == "test" || gin.Mode() == "debug" {
