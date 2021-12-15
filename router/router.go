@@ -3,6 +3,8 @@ package router
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"io/fs"
 	"net/http"
 	conf "notebook/config"
@@ -12,8 +14,6 @@ import (
 
 	"notebook/database"
 )
-import swaggerfiles "github.com/swaggo/files"
-import ginSwagger "github.com/swaggo/gin-swagger"
 
 func init() {
 
@@ -42,8 +42,11 @@ func SetupServer() *gin.Engine {
 	r.GET("/", func(context *gin.Context) {
 		context.Redirect(301, "/web")
 	})
-	docs.SwaggerInfo.BasePath = "/api"
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	config := conf.Conf
+	if config.Server.ApiDoc {
+		docs.SwaggerInfo.BasePath = "/api"
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
 	//register api route
 	api := r.Group("/api")
 	{

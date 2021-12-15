@@ -1,5 +1,6 @@
 server:
   port: 8080
+  api_doc: true
 redis:
   host: localhost
   port: 6379

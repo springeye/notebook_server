@@ -22,7 +22,8 @@ const (
 
 type AppConfig struct {
 	Server *struct {
-		Port int
+		Port   int
+		ApiDoc bool `mapstructure:"api_doc"`
 	}
 	Logger *struct {
 		ShowSql bool `mapstructure:"show_sql"`
